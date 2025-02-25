@@ -3,20 +3,999 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Engineering Speed Test Topic Selector</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Engineering Quiz Speed Test</title>
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2c3e50;
+            --accent-color: #e74c3c;
+            --light-color: #ecf0f1;
+            --dark-color: #2c3e50;
+            --success-color: #2ecc71;
+            --warning-color: #f39c12;
+            --font-main: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background-color: #f5f7fa;
+            color: var(--dark-color);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .quiz-intro {
+            background-color: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
+        .topic-selection {
+            margin: 20px 0;
+        }
+
+        .topic-selector {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid var(--primary-color);
+            border-radius: 5px;
+            font-size: 16px;
+            color: var(--dark-color);
+            background-color: white;
+            cursor: pointer;
+        }
+
+        .start-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .start-btn:hover {
+            background-color: #2980b9;
+        }
+
+        .start-btn:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+
+        .quiz-container {
+            display: none;
+            background-color: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .quiz-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .question-count, .score {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .timer-container {
+            width: 100%;
+            height: 10px;
+            background-color: #eee;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .timer-bar {
+            height: 100%;
+            width: 100%;
+            background-color: var(--accent-color);
+            transition: width 0.1s linear;
+        }
+
+        .question {
+            font-size: 20px;
+            margin-bottom: 20px;
+        }
+
+        .options {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+
+        .option {
+            padding: 15px;
+            background-color: var(--light-color);
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .option:hover {
+            background-color: #e3e8ec;
+            border-color: var(--primary-color);
+        }
+
+        .option.correct {
+            background-color: var(--success-color);
+            color: white;
+            border-color: var(--success-color);
+        }
+
+        .option.incorrect {
+            background-color: var(--accent-color);
+            color: white;
+            border-color: var(--accent-color);
+        }
+
+        .option.disabled {
+            pointer-events: none;
+        }
+
+        .results {
+            display: none;
+            text-align: center;
+            background-color: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .results h2 {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+        }
+
+        .score-display {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        .restart-btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .restart-btn:hover {
+            background-color: #2980b9;
+        }
+
+        .upgrade-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .upgrade-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .upgrade-content h2 {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+        }
+
+        .close-upgrade {
+            display: inline-block;
+            padding: 10px 20px;
+            margin-top: 20px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        /* Styling for disabled topics */
+        option.disabled {
+            color: #bdc3c7;
+            font-style: italic;
+        }
+
+        @media (min-width: 768px) {
+            .options {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="container">
-        <h1>Engineering Speed Test</h1>
-        <select id="topicSelect">
-            <option value="">Select a Topic</option>
-            <option value="https://testyourspeed.github.io/civilengineering/">Civil Engineering</option>
-            <option value="https://testyourspeed.github.io/mechanicalengineering/">Mechanical Engineering</option>
-            <option value="https://testyourspeed.github.io/electricalengineering/">Electrical Engineering</option>
-        </select>
-        <button id="goButton" disabled>Go to Test</button>
+        <header>
+            <h1>Engineering Quiz Speed Test</h1>
+            <p>Test your knowledge with quick-fire engineering questions!</p>
+        </header>
+
+        <div class="quiz-intro">
+            <h2>Ready to test your engineering knowledge?</h2>
+            <p>Select a topic and answer 10 random questions. You have 20 seconds for each question!</p>
+            
+            <div class="topic-selection">
+                <label for="topic">Select Topic:</label>
+                <select id="topic" class="topic-selector">
+                    <option value="" disabled selected>Choose a topic...</option>
+                    <option value="civil">Civil Engineering</option>
+                    <option value="mechanical">Mechanical Engineering</option>
+                    <option value="electrical">Electrical Engineering</option>
+                    <option value="chemical" disabled>Chemical Engineering</option>
+                    <option value="software" disabled>Software Engineering</option>
+                    <option value="aerospace" disabled>Aerospace Engineering</option>
+                    <option value="biomedical" disabled>Biomedical Engineering</option>
+                </select>
+            </div>
+            
+            <button id="start-btn" class="start-btn" disabled>Start Quiz</button>
+        </div>
+
+        <div id="quiz-container" class="quiz-container">
+            <div class="quiz-header">
+                <div class="question-count">Question <span id="current">1</span>/<span id="total">10</span></div>
+                <div class="score">Score: <span id="score">0</span></div>
+            </div>
+            
+            <div class="timer-container">
+                <div id="timer-bar" class="timer-bar"></div>
+            </div>
+            
+            <div id="question" class="question"></div>
+            
+            <div id="options" class="options"></div>
+        </div>
+
+        <div id="results" class="results">
+            <h2>Quiz Complete!</h2>
+            <div class="score-display">Your score: <span id="final-score">0</span> out of 10</div>
+            <button id="restart-btn" class="restart-btn">Take Another Quiz</button>
+        </div>
     </div>
-    <script src="script.js"></script>
+
+    <div id="upgrade-modal" class="upgrade-modal">
+        <div class="upgrade-content">
+            <h2>UPGRADE TO PRO</h2>
+            <p>This topic is only available in the PRO version.</p>
+            <button id="close-upgrade" class="close-upgrade">Close</button>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const topicSelector = document.getElementById('topic');
+        const startButton = document.getElementById('start-btn');
+        const quizContainer = document.getElementById('quiz-container');
+        const quizIntro = document.querySelector('.quiz-intro');
+        const questionElement = document.getElementById('question');
+        const optionsContainer = document.getElementById('options');
+        const currentQuestionElement = document.getElementById('current');
+        const totalQuestionsElement = document.getElementById('total');
+        const scoreElement = document.getElementById('score');
+        const timerBar = document.getElementById('timer-bar');
+        const resultsContainer = document.getElementById('results');
+        const finalScoreElement = document.getElementById('final-score');
+        const restartButton = document.getElementById('restart-btn');
+        const upgradeModal = document.getElementById('upgrade-modal');
+        const closeUpgradeButton = document.getElementById('close-upgrade');
+
+        // Quiz state
+        let currentQuestion = 0;
+        let score = 0;
+        let timer;
+        let timeLeft;
+        let questions = [];
+        let answered = false;
+
+        // Question Banks
+        const questionBanks = {
+            civil: [
+                {
+                    question: "What is the primary purpose of a retaining wall?",
+                    options: [
+                        "To support vertical loads from buildings",
+                        "To prevent lateral movement of soil",
+                        "To channel water away from structures",
+                        "To provide aesthetic improvement"
+                    ],
+                    answer: 1
+                },
+                {
+                    question: "Which concrete test measures consistency and workability?",
+                    options: [
+                        "Compressive strength test",
+                        "Slump test",
+                        "Tensile strength test",
+                        "Rebound hammer test"
+                    ],
+                    answer: 1
+                },
+                {
+                    question: "What is the name for the vertical distance between the crest and trough of a water wave?",
+                    options: [
+                        "Wavelength",
+                        "Period",
+                        "Wave height",
+                        "Amplitude"
+                    ],
+                    answer: 2
+                },
+                {
+                    question: "Which of these is NOT a common foundation type?",
+                    options: [
+                        "Pile foundation",
+                        "Raft foundation",
+                        "Isolated footing",
+                        "Cantilever foundation"
+                    ],
+                    answer: 3
+                },
+                {
+                    question: "What is the primary function of a shear wall in a building?",
+                    options: [
+                        "To carry vertical loads",
+                        "To resist lateral forces",
+                        "To provide insulation",
+                        "To create partition spaces"
+                    ],
+                    answer: 1
+                },
+                {
+                    question: "Which type of cement is most resistant to sulfate attack?",
+                    options: [
+                        "Ordinary Portland Cement",
+                        "Rapid Hardening Cement",
+                        "Sulfate Resistant Cement",
+                        "White Cement"
+                    ],
+                    answer: 2
+                },
+                {
+                    question: "What is the primary purpose of a culvert in road construction?",
+                    options: [
+                        "To provide drainage beneath the roadway",
+                        "To support the road surface",
+                        "To reduce traffic speed",
+                        "To mark property boundaries"
+                    ],
+                    answer: 0
+                },
+                {
+                    question: "Which surveying instrument is used to measure horizontal angles?",
+                    options: [
+                        "Level",
+                        "Theodolite",
+                        "Plumb bob",
+                        "Ranging rod"
+                    ],
+                    answer: 1
+                },
+                {
+                    question: "What does the term 'rebar' refer to in construction?",
+                    options: [
+                        "A type of concrete mix",
+                        "Steel reinforcement bars",
+                        "A measurement tool",
+                        "A timber frame element"
+                    ],
+                    answer: 1
+                },
+                {
+                    question: "What is the purpose of expansion joints in concrete structures?",
+                    options: [
+                        "To increase structural strength",
+                        "To allow for thermal expansion and contraction",
+                        "To add decorative elements",
+                        "To reduce the amount of concrete required"
+                    ],
+                    answer: 1
+                },
+                {
+                    question: "Which soil type generally has the highest permeability?",
+                    options: [
+                        "Clay",
+                        "Silt",
+                        "Sand",
+                        "Organic soil"
+                    ],
+                    answer: 2
+                },
+                {
+                    question: "What is the purpose of a cantilever in structural engineering?",
+                    options: [
+                        "To connect two beams",
+                        "To provide support at a fixed end while leaving the other end free",
+                        "To distribute load evenly across a surface",
+                        "To prevent compression in columns"
+                    ],
+                    answer: 1
+                },
+                {
+                    question: "What is the standard diameter of a manhole for sewer systems?",
+                    options: [
+                        "0.5 meters",
+                        "1.0 meters",
+                        "1.5 meters",
+                        "2.0 meters"
+                    ],
+                    answer: 1
+                },
+                {
+                    question: "Which of these is a common water treatment process?",
+                    options: [
+                        "Filtration",
+                        "Carbonation",
+                        "Vulcanization",
+                        "Annealing"
+                    ],
+                    answer: 0
+                },
+                {
+                    question: "What is the primary purpose of a geotextile in civil engineering?",
+                    options: [
+                        "To measure ground movements",
+                        "To prevent soil erosion",
+                        "To increase concrete strength",
+                        "To calculate structural loads"
+                    ],
+                    answer: 1
+                }
+            ],
+            mechanical: [
+                {
+                    question: "What law states that pressure and volume are inversely proportional at constant temperature?",
+                    options: [
+                        "Charles' Law",
+                        "Boyle's Law",
+                        "Gay-Lussac's Law",
+                        "Avogadro's Law"
+                    ],
+                    answer: 1
+                },
+                {
+                    question: "What is the mechanical advantage of a pulley system with 3 supporting pulleys?",
+                    options: [
+                        "2",
+                        "3",
+                        "4",
+                        "6"
+                    ],
+                    answer: 2
+                },
+                {
+                    question: "Which type of gear is used to connect non-parallel, non-intersecting shafts?",
+                    options: [
+                        "Spur gear",
+                        "Bevel gear",
+                        "Worm gear",
+                        "Helical gear"
+                    ],
+                    answer: 2
+                },
+                {
+                    question: "What is the purpose of a flywheel in an engine?",
+                    options: [
+                        "To reduce friction",
+                        "To store rotational energy",
+                        "To cool the engine",
+                        "To generate electricity"
+                    ],
+                    answer: 1
+                },
+                {
+                    question: "Which cycle is used in diesel engines?",
+                    options: [
+                        "Otto cycle",
+                        "Diesel cycle",
+                        "Rankine cycle",
+                        "Carnot cycle"
+                    ],
+                    answer: 1
+                },
+                {
+                    question: "What is the primary function of a heat exchanger?",
+                    options: [
+                        "To convert heat to mechanical energy",
+                        "To store thermal energy",
+                        "To transfer heat between fluids",
+                        "To increase fluid pressure"
+                    ],
+                    answer: 2
+                },
+                {
+                    question: "Which material property represents the ability to return to its original shape after deformation?",
+                    options: [
+                        "Ductility",
+                        "Elasticity",
+                        "Malleability",
+                        "Toughness"
+                    ],
+                    answer: 1
+                },
+                {
+                    question: "What is the purpose of a governor in an engine?",
+                    options: [
+                        "To control engine speed",
+                        "To increase fuel efficiency",
+                        "To reduce emissions",
+                        "To increase power output"
+                    ],
+                    answer: 0
+                },
+                {
+                    question: "Which law of thermodynamics states that energy cannot be created or destroyed?",
+                    options: [
+                        "Zeroth law",
+                        "First law",
+                        "Second law",
+                        "Third law"
+                    ],
+                    answer: 1
+                },
+                {
+                    question: "What is the primary purpose of a hydraulic accumulator?",
+                    options: [
+                        "To increase fluid pressure",
+                        "To store hydraulic energy",
+                        "To filter hydraulic fluid",
+                        "To cool hydraulic systems"
+                    ],
+                    answer: 1
+                },
+                {
+                    question: "Which type of bearing uses fluid pressure to separate the surfaces in relative motion?",
+                    options: [
+                        "Ball bearing",
+                        "Roller bearing",
+                        "Fluid bearing",
+                        "Needle bearing"
+                    ],
+                    answer: 2
+                },
+                {
+                    question: "What is the term for the ratio of output power to input power in a machine?",
+                    options: [
+                        "Mechanical advantage",
+                        "Efficiency",
+                        "Power factor",
+                        "Load ratio"
+                    ],
+                    answer: 1
+                },
+                {
+                    question: "Which welding process uses an electric arc between a consumable electrode and the workpiece?",
+                    options: [
+                        "TIG welding",
+                        "MIG welding",
+                        "Laser welding",
+                        "Ultrasonic welding"
+                    ],
+                    answer: 1
+                },
+                {
+                    question: "What is the purpose of a dynamometer?",
+                    options: [
+                        "To measure engine power",
+                        "To control engine speed",
+                        "To reduce vibration",
+                        "To increase fuel efficiency"
+                    ],
+                    answer: 0
+                },
+                {
+                    question: "Which mechanism converts rotary motion to linear motion?",
+                    options: [
+                        "Gear",
+                        "Cam",
+                        "Pulley",
+                        "Clutch"
+                    ],
+                    answer: 1
+                }
+            ],
+            electrical: [
+                {
+                    question: "What is Ohm's Law?",
+                    options: [
+                        "P = IV",
+                        "V = IR",
+                        "Q = CV",
+                        "F = ma"
+                    ],
+                    answer: 1
+                },
+                {
+                    question: "Which component stores electrical energy in an electric field?",
+                    options: [
+                        "Resistor",
+                        "Inductor",
+                        "Capacitor",
+                        "Diode"
+                    ],
+                    answer: 2
+                },
+                {
+                    question: "What is the unit of electrical resistance?",
+                    options: [
+                        "Volt",
+                        "Ampere",
+                        "Watt",
+                        "Ohm"
+                    ],
+                    answer: 3
+                },
+                {
+                    question: "Which law states that the current through a conductor is proportional to voltage and inversely proportional to resistance?",
+                    options: [
+                        "Kirchhoff's Current Law",
+                        "Ohm's Law",
+                        "Faraday's Law",
+                        "Ampere's Law"
+                    ],
+                    answer: 1
+                },
+                {
+                    question: "What type of motor uses slip rings and brushes?",
+                    options: [
+                        "DC motor",
+                        "Synchronous motor",
+                        "Induction motor",
+                        "Stepper motor"
+                    ],
+                    answer: 0
+                },
+                {
+                    question: "What is the purpose of a transformer?",
+                    options: [
+                        "To convert AC to DC",
+                        "To change voltage levels",
+                        "To store electrical energy",
+                        "To generate electricity"
+                    ],
+                    answer: 1
+                },
+                {
+                    question: "Which semiconductor device is used for amplification?",
+                    options: [
+                        "Diode",
+                        "Transistor",
+                        "Thyristor",
+                        "Resistor"
+                    ],
+                    answer: 1
+                },
+                {
+                    question: "What is the SI unit of frequency?",
+                    options: [
+                        "Second",
+                        "Hertz",
+                        "Watt",
+                        "Joule"
+                    ],
+                    answer: 1
+                },
+                {
+                    question: "Which material has the highest electrical conductivity?",
+                    options: [
+                        "Gold",
+                        "Copper",
+                        "Silver",
+                        "Aluminum"
+                    ],
+                    answer: 2
+                },
+                {
+                    question: "What is the purpose of a rectifier circuit?",
+                    options: [
+                        "To convert DC to AC",
+                        "To convert AC to DC",
+                        "To amplify signals",
+                        "To reduce voltage"
+                    ],
+                    answer: 1
+                },
+                {
+                    question: "Which of these is a passive component?",
+                    options: [
+                        "Transistor",
+                        "Operational amplifier",
+                        "Integrated circuit",
+                        "Resistor"
+                    ],
+                    answer: 3
+                },
+                {
+                    question: "What does MOSFET stand for?",
+                    options: [
+                        "Metal Oxide Semiconductor Field Effect Transistor",
+                        "Micro Operational System For Electronic Transmission",
+                        "Modern Oscillator System For Energy Transfer",
+                        "Multiple Output Single Field Enhancement Technology"
+                    ],
+                    answer: 0
+                },
+                {
+                    question: "Which circuit configuration provides the highest voltage gain?",
+                    options: [
+                        "Common emitter",
+                        "Common collector",
+                        "Common base",
+                        "All provide equal gain"
+                    ],
+                    answer: 0
+                },
+                {
+                    question: "What is the purpose of a voltage regulator?",
+                    options: [
+                        "To increase voltage",
+                        "To maintain a constant voltage level",
+                        "To convert AC to DC",
+                        "To store electrical energy"
+                    ],
+                    answer: 1
+                },
+                {
+                    question: "Which law states that the algebraic sum of all currents entering and exiting a node is zero?",
+                    options: [
+                        "Ohm's Law",
+                        "Faraday's Law",
+                        "Kirchhoff's Current Law",
+                        "Kirchhoff's Voltage Law"
+                    ],
+                    answer: 2
+                }
+            ]
+        };
+
+        // Event Listeners
+        topicSelector.addEventListener('change', handleTopicSelection);
+        startButton.addEventListener('click', startQuiz);
+        restartButton.addEventListener('click', restartQuiz);
+        closeUpgradeButton.addEventListener('click', closeUpgradeModal);
+
+        // Disable non-clickable options
+        const disabledOptions = Array.from(topicSelector.options).filter(option => option.disabled);
+        disabledOptions.forEach(option => {
+            option.classList.add('disabled');
+            option.addEventListener('mousedown', function(e) {
+                e.preventDefault();
+                if (this.value && this.disabled) {
+                    showUpgradeModal();
+                }
+                return false;
+            });
+        });
+
+        // Functions
+        function handleTopicSelection() {
+            if (topicSelector.value) {
+                startButton.disabled = false;
+            } else {
+                startButton.disabled = true;
+            }
+        }
+
+        function showUpgradeModal() {
+            upgradeModal.style.display = 'flex';
+        }
+
+        function closeUpgradeModal() {
+            upgradeModal.style.display = 'none';
+        }
+
+        function startQuiz() {
+            // Reset quiz state
+            currentQuestion = 0;
+            score = 0;
+            scoreElement.textContent = '0';
+            
+            // Get selected topic
+            const topic = topicSelector.value;
+            
+            // Select 10 random questions from the topic
+            const allQuestions = questionBanks[topic];
+            questions = getRandomQuestions(allQuestions, 10);
+            
+            // Hide intro, show quiz
+            quizIntro.style.display = 'none';
+            quizContainer.style.display = 'block';
+            resultsContainer.style.display = 'none';
+            
+            // Load first question
+            loadQuestion(currentQuestion);
+        }
+
+        function getRandomQuestions(questions, count) {
+            const shuffled = [...questions].sort(() => 0.5 - Math.random());
+            return shuffled.slice(0, count);
+        }
+
+        function loadQuestion(index) {
+            if (index >= questions.length) {
+                showResults();
+                return;
+            }
+            
+            answered = false;
+            const question = questions[index];
+            
+            // Update question counter
+            currentQuestionElement.textContent = index + 1;
+            totalQuestionsElement.textContent = questions.length;
+            
+            // Display question
+            questionElement.textContent = question.question;
+            
+            // Clear previous options
+            optionsContainer.innerHTML = '';
+            
+            // Add options
+            question.options.forEach((option, i) => {
+                const optionElement = document.createElement('div');
+                optionElement.classList.add('option');
+                optionElement.textContent = option;
+                optionElement.dataset.index = i;
+                optionElement.addEventListener('click', checkAnswer);
+                optionsContainer.appendChild(optionElement);
+            });
+            
+            // Start timer
+            startTimer();
+        }
+
+        function startTimer() {
+            clearInterval(timer);
+            timeLeft = 20;
+            timerBar.style.width = '100%';
+            
+            timer = setInterval(() => {
+                timeLeft -= 0.1;
+                const percentage = (timeLeft / 20) * 100;
+                timerBar.style.width = `${percentage}%`;
+                
+                // Color changes based on time left
+                if (percentage < 30) {
+                    timerBar.style.backgroundColor = '#e74c3c'; // Red when time is running out
+                } else if (percentage < 60) {
+                    timerBar.style.backgroundColor = '#f39c12'; // Orange when at medium
+                } else {
+                    timerBar.style.backgroundColor = '#2ecc71'; // Green when plenty of time
+                }
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    if (!answered) {
+                        // Time's up - show correct answer
+                        const correctIndex = questions[currentQuestion].answer;
+                        const options = document.querySelectorAll('.option');
+                        options.forEach(option => {
+                            const optionIndex = parseInt(option.dataset.index);
+                            if (optionIndex === correctIndex) {
+                                option.classList.add('correct');
+                            }
+                            option.classList.add('disabled');
+                        });
+                        
+                        // Move to next question after delay
+                        setTimeout(() => {
+                            currentQuestion++;
+                            loadQuestion(currentQuestion);
+                        }, 1500);
+                    }
+                }
+            }, 100);
+        }
+
+        function checkAnswer(e) {
+            if (answered) return;
+            
+            answered = true;
+            clearInterval(timer);
+            
+            const selectedOption = e.target;
+            const selectedIndex = parseInt(selectedOption.dataset.index);
+            const correctIndex = questions[currentQuestion].answer;
+            
+            // Disable all options
+            const options = document.querySelectorAll('.option');
+            options.forEach(option => {
+                option.classList.add('disabled');
+            });
+            
+            // Check if answer is correct
+            if (selectedIndex === correctIndex) {
+                selectedOption.classList.add('correct');
+                score++;
+                scoreElement.textContent = score;
+            } else {
+                selectedOption.classList.add('incorrect');
+                // Show correct answer
+                options[correctIndex].classList.add('correct');
+            }
+            
+            // Move to next question after delay
+            setTimeout(() => {
+                currentQuestion++;
+                loadQuestion(currentQuestion);
+            }, 1500);
+        }
+
+        function showResults() {
+            quizContainer.style.display = 'none';
+            resultsContainer.style.display = 'block';
+            finalScoreElement.textContent = score;
+        }
+
+        function restartQuiz() {
+            resultsContainer.style.display = 'none';
+            quizIntro.style.display = 'block';
+            topicSelector.value = '';
+            startButton.disabled = true;
+        }
+
+        // Handle clicks on disabled dropdown options
+        topicSelector.addEventListener('mousedown', function(e) {
+            const option = e.target.closest('option');
+            if (option && option.disabled && option.value) {
+                e.preventDefault();
+                this.blur();
+                showUpgradeModal();
+                return false;
+            }
+        });
+    </script>
 </body>
 </html>
